@@ -304,16 +304,38 @@ class Signals(
 // 基础对象，用于实现成员函数插槽
 open class Object {
 
-    private var _signals: Signals? = null
+    protected var _signals: Signals? = null
+
+    protected open fun _initSignals() {
+        // pass
+    }
 
     val signals: Signals
         get() {
             if (_signals == null) {
                 synchronized(this) {
-                    if (_signals == null)
+                    if (_signals == null) {
                         _signals = Signals(this)
+                        _initSignals()
+                    }
                 }
             }
             return _signals!!
         }
 }
+
+// 定义常用信号
+val kSignalChanged = "::nnt::changed"
+val kSignalChanging = "::nnt::changing"
+val kSignalStarting = "::nnt::starting"
+val kSignalStarted = "::nnt::started"
+val kSignalStopping = "::nnt::stopping"
+val kSignalStopped = "::nnt::stopped"
+val kSignalCompleting = "::nnt::completing"
+val kSignalCompleted = "::nnt::completed"
+val kSignalError = "::nnt::error"
+val kSignalDone = "::nnt::done"
+val kSignalNew = "::nnt::new"
+val kSignalYes = "::nnt:yes"
+val kSignalNo = "::nnt::no"
+val kSignalCancel = "::nnt::cancel"
