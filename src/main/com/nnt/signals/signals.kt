@@ -302,7 +302,7 @@ class Signals(
 }
 
 // 基础对象，用于实现成员函数插槽
-class Object {
+open class Object {
 
     private var _signals: Signals? = null
 
