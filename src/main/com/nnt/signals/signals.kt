@@ -10,7 +10,7 @@ class Tunnel {
     var payload: Any? = null
 }
 
-typealias FnSlot = (s: com.nnt.signals.Slot) -> Unit
+typealias FnSlot = (s: Slot) -> Unit
 typealias signal_t = String
 
 // 获得当前时间
@@ -35,7 +35,7 @@ class Slot {
     var signal: signal_t = ""
 
     // 激发频率限制 (emits per second)
-    var eps: UInt = 0u
+    var eps: Int = 0
 
     // 激活信号的对象
     var sender: Object? = null
@@ -52,19 +52,19 @@ class Slot {
         }
 
     // 调用几次自动解绑，默认为 0，不使用概设定
-    var count: UInt = 0u
-    var emitedCount: UInt = 0u
+    var count: Int = 0
+    var emitedCount: Int = 0
 
     // 激发信号 @data 附带的数据，激发后自动解除引用
     fun emit(data: Any?, tunnel: Tunnel?) {
-        if (eps > 0u) {
+        if (eps > 0) {
             val now = TimeCurrent()
             if (_epstm == 0.0) {
                 _epstm = now
             } else {
                 val el = now - _epstm
                 //this._epstms = now; 注释以支持快速多次点击中可以按照频率命中一次，而不是全部都忽略掉
-                if ((1000 / el).toUInt() > eps)
+                if ((1000 / el) > eps)
                     return
                 _epstm = now //命中一次后重置时间
             }
@@ -136,7 +136,7 @@ class Slots(signals: Signals) {
 
         val snaps = _slots.toList()
         for (s in snaps) {
-            if (s.count > 0u && (s.emitedCount >= s.count)) {
+            if (s.count > 0 && (s.emitedCount >= s.count)) {
                 _slots.remove(s)
                 continue // 已经达到设置激活的数量
             }
@@ -147,7 +147,7 @@ class Slots(signals: Signals) {
             s.emit(data, tunnel)
 
             // 判断激活数是否达到设置
-            if (s.count > 0u && (s.emitedCount >= s.count)) {
+            if (s.count > 0 && (s.emitedCount >= s.count)) {
                 _slots.remove(s)
             }
 
@@ -225,7 +225,7 @@ class Signals(
     fun once(sig: signal_t, cb: FnSlot): Slot? {
         val r = connect(sig, cb)
         if (r != null)
-            r.count = 1u
+            r.count = 1
         return r
     }
 
@@ -258,7 +258,7 @@ class Signals(
     }
 
     // 激发信号
-    fun emit(sig: signal_t, data: Any?, tunnel: Tunnel?) {
+    fun emit(sig: signal_t, data: Any? = null, tunnel: Tunnel? = null) {
         val ss = _signals[sig]
         if (ss == null) {
             println("对象信号 ${sig} 不存在")
@@ -269,7 +269,7 @@ class Signals(
     }
 
     // 断开连接
-    fun disconnect(sig: signal_t, cb: FnSlot?) {
+    fun disconnect(sig: signal_t, cb: FnSlot? = null) {
         val ss = _signals[sig]
         if (ss == null)
             return
